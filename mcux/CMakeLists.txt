@@ -18,6 +18,9 @@ elseif("${MCUX_DEVICE}" STREQUAL "LPC55S69_CPU1")
   set(MCUX_DEVICE LPC55S69)
 elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT1052")
   string(REGEX REPLACE "(.*)[AB]$" "CPU_\\1B" MCUX_CPU ${CONFIG_SOC_PART_NUMBER})
+elseif("${MCUX_DEVICE}" STREQUAL "MIMXRT685S_CM33")
+  set(MCUX_CPU CPU_${CONFIG_SOC_PART_NUMBER}_cm33)
+  set(MCUX_DEVICE MIMXRT685S)
 else()
   set(MCUX_CPU CPU_${CONFIG_SOC_PART_NUMBER})
 endif()
@@ -34,12 +37,11 @@ zephyr_compile_definitions(${MCUX_CPU})
 # Build mcux device-specific objects. Although it is not normal
 # practice, drilling down like this avoids the need for repetitive
 # build scripts for every mcux device.
-zephyr_sources(devices/${MCUX_DEVICE}/fsl_clock.c)
-if (${MCUX_DEVICE} MATCHES "LPC")
-  zephyr_sources(devices/${MCUX_DEVICE}/fsl_power.c)
-  zephyr_sources(devices/${MCUX_DEVICE}/fsl_reset.c)
+zephyr_library_sources(devices/${MCUX_DEVICE}/fsl_clock.c)
+if (${MCUX_DEVICE} MATCHES "LPC|MIMXRT6")
+  zephyr_library_sources(devices/${MCUX_DEVICE}/fsl_power.c)
+  zephyr_library_sources(devices/${MCUX_DEVICE}/fsl_reset.c)
 endif()
-
 
 # Build mcux drivers that can be used for multiple SoC's.
 add_subdirectory(boards)
@@ -58,4 +60,4 @@ add_subdirectory_ifdef(
 
 enable_language(C ASM)
 
-zephyr_sources_ifdef(CONFIG_SOC_LPC54114_M4 devices/${MCUX_DEVICE}/gcc/startup_LPC54114_cm4.S)
+zephyr_library_sources_ifdef(CONFIG_SOC_LPC54114_M4 devices/${MCUX_DEVICE}/gcc/startup_LPC54114_cm4.S)
